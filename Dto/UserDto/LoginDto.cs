@@ -4,12 +4,11 @@ namespace Diagramma_Ganta.Dto;
 
 public class LoginDto
 {
-    [Required(ErrorMessage = "Email is required")]
-    [EmailAddress(ErrorMessage = "Invalid email format")]
+    [Required(ErrorMessage = "Email обязателен")]
+    [EmailAddress(ErrorMessage = "Невалидный формат email")]
     public string email { get; set; }
     
-    [Required(ErrorMessage = "Password is required")]
-    [MinLength(8, ErrorMessage = "Password must be at least 8 characters")]
+    [Required(ErrorMessage = "Пароль обязателен")]
     public string password { get; set; }
     
 }

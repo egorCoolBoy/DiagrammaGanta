@@ -20,7 +20,7 @@ public class TaskController : ControllerBase
     {
         var token = Request.Cookies["session"];
         if (token == null)
-            return Conflict(new { message = "no session" });
+            return Conflict(new { message = "Нет сессии" });
         if (title == null)
             return BadRequest();
 
@@ -32,6 +32,9 @@ public class TaskController : ControllerBase
     [HttpDelete("delete/task")]
     public async Task<IActionResult> DeleteTask(Guid taskId)
     {
+        var token = Request.Cookies["session"];
+        if (token == null)
+            return Unauthorized();
         if (await _taskService.DeleteTask(taskId))
             return Ok();
         return BadRequest();
@@ -41,8 +44,11 @@ public class TaskController : ControllerBase
     [HttpPut("put/task")]
     public async Task<IActionResult> UpdateTask(Guid taskId, [FromBody] UpdateTaskDto updateDto)
     {
+        var token = Request.Cookies["session"];
+        if (token == null)
+            return Unauthorized();
         if (updateDto == null)
-            return BadRequest("Update data is required");
+            return BadRequest(new { message = "Нечего обновлять" });
         
         if (updateDto.Title == null && 
             updateDto.Description == null && 
@@ -51,20 +57,23 @@ public class TaskController : ControllerBase
             updateDto.Users == null && 
             updateDto.Predecessors == null)
         {
-            return BadRequest("At least one field must be provided for update");
+            return BadRequest(new { message = "Нечего обновлять" });
         }
 
         var result = await _taskService.UpdateTask(taskId, updateDto);
     
         if (!result)
-            return NotFound("Task not found");
+            return NotFound(new { message = "Задача не найдена" });
 
-        return Ok("Task updated successfully");
+        return Ok(new { message = "Задача успешно обновлена" });
     }
     
     [HttpGet("project/{projectId}/tasks")]
     public async Task<IActionResult> GetProjectTasks(Guid projectId)
     {
+        var token = Request.Cookies["session"];
+        if (token == null)
+            return Unauthorized();
         var tasks = await _taskService.GetProjectTasks(projectId);
         return Ok(tasks);
     }
@@ -72,9 +81,12 @@ public class TaskController : ControllerBase
     [HttpGet("task/{taskId}")]
     public async Task<IActionResult> GetTaskById(Guid taskId)
     {
+        var token = Request.Cookies["session"];
+        if (token == null)
+            return Unauthorized();
         var task = await _taskService.GetTaskById(taskId);
         if (task == null)
-            return NotFound("Task not found");
+            return NotFound(new { message = "Задача не найдена" });
         return Ok(task);
     }
     

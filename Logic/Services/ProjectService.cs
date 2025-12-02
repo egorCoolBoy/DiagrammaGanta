@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
 using Diagramma_Ganta.Dto.Project;
 using Diagramma_Ganta.Logic.IServices;
 using Diagramma_Ganta.Context;
@@ -24,24 +25,28 @@ public class ProjectService : IProjectService
         if (session == null)
             return null;
         
-        
         var projects = await _db.Projects.Include(p=>p.Owner)
             .Include(p=>p.Subject).Where(p => p.Team.Users.Any(u => u.Id == session.UserId))
             .Select(p => new GetProjectDto
-        {
-            Id = p.Id,
-            Title = p.Title,
-            Subject = p.Subject.Title,
-            CreationDate = p.CreationDate,
-            Description = p.Description,
-            OwnerName = p.Owner.Email
-        }).ToListAsync();
-        
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Subject = p.Subject.Title,
+                CreationDate = p.CreationDate,
+                Description = p.Description,
+                IsOwner = session.UserId == p.OwnerId,
+                OwnerName = p.Owner.Email
+            }).ToListAsync();
         return projects;
     }
 
-    public async Task<GetProjectDto> GetProjectById(Guid projId)
+    public async Task<GetProjectDto> GetProjectById(Guid projId,Guid sessionToken)
     {
+        
+        var session = await _db.Sessions.FirstOrDefaultAsync(s=>s.Token == sessionToken && s.ExpiresAt > DateTime.UtcNow);
+        if (session == null)
+            return null;
+        
         var proj = await _db.Projects.Include(p=>p.Owner).Include(p=>p.Subject).Select(p=> new GetProjectDto
         {
             Id = p.Id,
@@ -49,6 +54,7 @@ public class ProjectService : IProjectService
             Subject = p.Subject.Title,
             CreationDate = p.CreationDate,
             Description = p.Description,
+            IsOwner = p.OwnerId == session.UserId,
             OwnerName = p.Owner.Email
         }).FirstOrDefaultAsync(p=>p.Id == projId);
         return proj;

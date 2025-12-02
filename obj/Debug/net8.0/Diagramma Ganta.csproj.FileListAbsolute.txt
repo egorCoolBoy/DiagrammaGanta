@@ -170,3 +170,4 @@ C:\Users\ega02\RiderProjects\Diagramma Ganta\Diagramma Ganta\obj\Debug\net8.0\Di
 C:\Users\ega02\RiderProjects\Diagramma Ganta\Diagramma Ganta\obj\Debug\net8.0\ref\Diagramma Ganta.dll
 C:\Users\ega02\RiderProjects\Diagramma Ganta\Diagramma Ganta\bin\Debug\net8.0\DevOne.Security.Cryptography.BCrypt.dll
 C:\Users\ega02\RiderProjects\Diagramma Ganta\Diagramma Ganta\bin\Debug\net8.0\BCrypt.Net-Next.dll
+C:\Users\ega02\RiderProjects\Diagramma Ganta\Diagramma Ganta\obj\Debug\net8.0\Diagramma Ganta.sourcelink.json

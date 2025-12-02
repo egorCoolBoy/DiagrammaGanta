@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Diagramma Ganta")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+260556e526c8d62924d143b94f93c35256bc5090")]
 [assembly: System.Reflection.AssemblyProductAttribute("Diagramma Ganta")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Diagramma Ganta")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

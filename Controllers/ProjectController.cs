@@ -21,17 +21,23 @@ public class ProjectController : ControllerBase
     {
         var token = Request.Cookies["session"];
         if (token == null)
-            return Unauthorized();
-        
+            return Unauthorized(new{message = "Нет сессии"});
+    
         var projects = await _projService.GetProjects(Guid.Parse(token));
-
+    
+        if (projects == null)
+            return Unauthorized(new{message = "Сессия невалидна"});
+    
         return Ok(projects);
     }
 
     [HttpGet("get/project{id}")]
     public async Task<IActionResult> GetProject(Guid id)
     {
-        var project = await  _projService.GetProjectById(id);
+        var token = Request.Cookies["session"];
+        if (token == null)
+            return Unauthorized();
+        var project = await  _projService.GetProjectById(id,Guid.Parse(token));
         return Ok(project);
     }
 
@@ -54,12 +60,15 @@ public class ProjectController : ControllerBase
         
         if (await _projService.Delete(projectId,Guid.Parse(token)))
             return Ok();
-        return BadRequest(new{message = "something wrong"});
+        return BadRequest(new{message = "что то пошло не так"});
     }
 
     [HttpPatch("patch/description")]
     public async Task<IActionResult> UpdateDescription([FromQuery] UpdateDescriptionDto description)
     {
+        var token = Request.Cookies["session"];
+        if (token == null)
+            return Unauthorized();
         if (await _projService.Update(description))
             return Ok();
         return BadRequest();

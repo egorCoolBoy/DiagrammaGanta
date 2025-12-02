@@ -37,11 +37,11 @@ public class UserController : ControllerBase
         
         if (!await _autoService.IsEmailUnique(user.email))
         {
-            return Conflict(new { Email = "already exists" });
+            return Conflict(new { Email = "Такой email уже существует" });
         }
 
         var userId = await _autoService.Register(user);
-        return Created("", new { id = userId });
+        return Created("", new { message = "Вы успешно зарегестрировались" });
     }
     
     [HttpPost("login")]
@@ -50,7 +50,7 @@ public class UserController : ControllerBase
         var token = await _autoService.Login(request);
     
         if (token == null)
-            return Unauthorized(new { message = "Invalid email or password" });
+            return Unauthorized(new { message = "невалидная почта или пароль" });
         
         var expires = DateTime.UtcNow.AddDays(30);
         Response.Cookies.Append("session", token, new CookieOptions
@@ -61,7 +61,7 @@ public class UserController : ControllerBase
             Secure = true,    
         });
 
-        return Ok(new { message = "true" });
+        return Ok(new { message = "Вы успешно вошли в систему" });
     }
     
     [HttpPost("logout")]
@@ -71,19 +71,19 @@ public class UserController : ControllerBase
     
         if (string.IsNullOrEmpty(sessionToken))
         {
-            return Unauthorized(new { message = "No session cookie" });
+            return Unauthorized(new { message = "Сессия неактуальна" });
         }
         
         var result = await _autoService.Logout(sessionToken);
     
         if (result == null)
         {
-            return Unauthorized(new { message = "Invalid cookie" });
+            return Unauthorized(new { message = "Невалидный куки" });
         }
         
         Response.Cookies.Delete("session");
 
-        return Ok(new { message = "successful" });
+        return Ok(new { message = "Успешно" });
     }
     
     [HttpGet("me")]
@@ -92,12 +92,12 @@ public class UserController : ControllerBase
         var sessionToken = Request.Cookies["session"];
     
         if (string.IsNullOrEmpty(sessionToken))
-            return Unauthorized(new { message = "No session cookie" });
+            return Unauthorized(new { message = false });
 
         var user = await _autoService.GetUser(sessionToken);
     
         if (user == null)
-            return Unauthorized(new { message = "No session cookie" });
+            return Unauthorized(new { message = false });
 
 
         return Ok(user);

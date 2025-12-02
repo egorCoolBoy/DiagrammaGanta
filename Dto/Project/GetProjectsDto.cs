@@ -7,6 +7,7 @@ public class GetProjectDto
     public string Subject { get; set; }
     public string Description { get; set; }
     public DateTime CreationDate { get; set; } = DateTime.Now;
+    public bool IsOwner { get; set; } = false;
     public string OwnerName { get; set; }
     
 }

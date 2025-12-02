@@ -4,7 +4,7 @@ namespace Diagramma_Ganta.Dto;
 
 public class MeDto
 {
-    [Required(ErrorMessage = "Email is required")]
+    [Required(ErrorMessage = "Email обязателен")]
     [EmailAddress(ErrorMessage = "Invalid email format")]
     public string email { get; set; } = string.Empty;
     

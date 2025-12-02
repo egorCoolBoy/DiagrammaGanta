@@ -42,12 +42,12 @@ public class TeamController : ControllerBase
         var response = await _teamService.AddUser(body.ProjectId, body.Email, Guid.Parse(sessionToken));
 
         if (response == false)
-            return Conflict(new { User = "already exists in team" });
+            return Conflict(new {message = $"{body.Email} уже есть в команде" });
 
         if (response == null)
-            return BadRequest(new { message = $"no {body.Email} in base or you have not rights" });
+            return BadRequest(new { message = $"{body.Email} еще не зарегестировался " });
 
-        return Ok(new { message = $"{body.Email} added" });
+        return Ok(new { message = $"{body.Email} добавлен" });
     }
 
     [HttpDelete("delete/user")]
@@ -77,10 +77,10 @@ public class TeamController : ControllerBase
         var response = await _teamService.DeleteUser(body.ProjectId, body.UserId, Guid.Parse(sessionToken));
 
         if (response == false)
-            return Conflict(new { message = "UnExpected" });
+            return Conflict(new { message = "Что то пошло не так" });
 
         if (response == null)
-            return Conflict(new { message = "No user or team in base" });
+            return Conflict(new { message = $"Нет такого пользователя" });
 
         return Ok();
 
@@ -92,7 +92,7 @@ public class TeamController : ControllerBase
     {
         var users = await _teamService.GetUsers(projectId);
         if (users == null)
-            return NotFound(new{message = "no project"});
+            return NotFound(new{message = "нет такого проекта"});
         return Ok(users);
     }
 
