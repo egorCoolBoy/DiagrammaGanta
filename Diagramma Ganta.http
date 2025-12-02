@@ -1,0 +1,6 @@
+@Diagramma_Ganta_HostAddress = http://localhost:5044
+
+GET {{Diagramma_Ganta_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
