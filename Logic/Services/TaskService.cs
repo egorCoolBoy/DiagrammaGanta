@@ -91,81 +91,93 @@ public class TaskService : ITaskService
     }
     
     public async Task<bool> UpdateTask(Guid taskId, UpdateTaskDto updateDto)
-    {
-        var task = await _db.Tasks
-            .Include(t => t.Users)
-            .Include(t => t.Dependencies)
-            .FirstOrDefaultAsync(t => t.Id == taskId);
+{
+    var task = await _db.Tasks
+        .Include(t => t.Users)
+        .Include(t => t.Dependencies)
+        .FirstOrDefaultAsync(t => t.Id == taskId);
 
-        if (task == null)
+    if (task == null)
+        return false;
+
+    if (updateDto.Title != null)
+        task.Title = updateDto.Title;
+
+    if (updateDto.Description != null)
+        task.Description = updateDto.Description;
+
+    if (updateDto.TaskStatus.HasValue)
+        task.TaskStatus = (TaskStatus)updateDto.TaskStatus.Value;
+
+    if (updateDto.Deadline.HasValue)
+        task.Deadline = updateDto.Deadline.Value;
+
+    if (updateDto.Users != null)
+    {
+        var team = await _db.Teams
+            .Include(t => t.Users)
+            .FirstOrDefaultAsync(t => t.ProjectId == task.ProjectId);
+
+        if (team == null)
+            return false;
+
+        var userIds = updateDto.Users.Select(u => u.Id).ToList();
+
+        var validUserIds = team.Users
+            .Where(u => userIds.Contains(u.Id))
+            .Select(u => u.Id)
+            .ToList();
+
+        if (validUserIds.Count != userIds.Count)
+            return false;
+
+        var users = await _db.Users
+            .Where(u => validUserIds.Contains(u.Id))
+            .ToListAsync();
+
+        task.Users = users;
+    }
+
+    if (updateDto.Predecessors != null)
+    {
+        var incomingPredecessors = updateDto.Predecessors
+            .Where(id => id != Guid.Empty)      
+            .Distinct()
+            .Where(id => id != taskId)          
+            .ToList();
+
+        if (updateDto.Predecessors.Contains(taskId))
+        {
+            return false;
+        }
+        
+        var validPredecessorIds = await _db.Tasks
+            .Where(t => t.ProjectId == task.ProjectId && incomingPredecessors.Contains(t.Id))
+            .Select(t => t.Id)
+            .ToListAsync();
+        
+        if (validPredecessorIds.Count != incomingPredecessors.Count)
             return false;
         
-        if (updateDto.Title != null)
-            task.Title = updateDto.Title;
-
-        if (updateDto.Description != null)
-            task.Description = updateDto.Description;
-
-        if (updateDto.TaskStatus.HasValue)
-            task.TaskStatus = (TaskStatus)updateDto.TaskStatus.Value;
-
-        if (updateDto.Deadline.HasValue)
-            task.Deadline = updateDto.Deadline.Value;
+        _db.TaskDependencies.RemoveRange(task.Dependencies);
         
-        if (updateDto.Users != null)
-        {
-            var team = await _db.Teams
-                .Include(t => t.Users)
-                .FirstOrDefaultAsync(t => t.ProjectId == task.ProjectId);
+        var newDependencies = validPredecessorIds
+            .Select(predecessorId => new TaskDependency
+            {
+                TaskId = taskId,
+                PredecessorId = predecessorId
+            })
+            .ToList();
+
+        await _db.TaskDependencies.AddRangeAsync(newDependencies);
         
-            if (team == null)
-                return false; 
-
-            var userIds = updateDto.Users.Select(u => u.Id).ToList();
-            
-            var validUserIds = team.Users
-                .Where(u => userIds.Contains(u.Id))
-                .Select(u => u.Id)
-                .ToList();
-            
-            if (validUserIds.Count != userIds.Count)
-                return false;
-
-            var users = await _db.Users
-                .Where(u => validUserIds.Contains(u.Id))
-                .ToListAsync();
-    
-            task.Users = users;
-        }
-    
-        if (updateDto.Predecessors != null)
-        {
-            var validPredecessorIds = await _db.Tasks
-                .Where(t => t.ProjectId == task.ProjectId && updateDto.Predecessors.Contains(t.Id))
-                .Select(t => t.Id)
-                .ToListAsync();
-
-            
-            if (validPredecessorIds.Count != updateDto.Predecessors.Count)
-                return false;
-
-            _db.TaskDependencies.RemoveRange(task.Dependencies);
-        
-            var newDependencies = validPredecessorIds
-                .Select(predecessorId => new TaskDependency
-                {
-                    TaskId = taskId,
-                    PredecessorId = predecessorId
-                })
-                .ToList();
-
-            await _db.TaskDependencies.AddRangeAsync(newDependencies);
-            task.Dependencies = newDependencies;
-        }
-
-        await _db.SaveChangesAsync();
-        return true;
+        task.Dependencies = newDependencies;
     }
+
+    await _db.SaveChangesAsync();
+    return true;
+}
+
     
     
     public async Task<TaskDto?> GetTaskById(Guid taskId)

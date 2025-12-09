@@ -87,6 +87,14 @@ public class UserService : IUserService
 
         return userDto;
     }
+
+    public async Task<bool> IsSessionActive(string sessionToken)
+    {
+        var session1 = await _db.Sessions.FirstOrDefaultAsync(s=>s.Token == Guid.Parse(sessionToken) && s.ExpiresAt > DateTime.UtcNow);
+        if (session1 != null)
+            return false;
+        return true;
+    }
     
     public async Task<bool> IsEmailUnique(string email)
     {

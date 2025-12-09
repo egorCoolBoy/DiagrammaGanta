@@ -21,12 +21,12 @@ public class ProjectController : ControllerBase
     {
         var token = Request.Cookies["session"];
         if (token == null)
-            return Unauthorized(new{message = "Нет сессии"});
+            return Unauthorized(new{message = "Не авторизованный пользователь"});
     
         var projects = await _projService.GetProjects(Guid.Parse(token));
     
         if (projects == null)
-            return Unauthorized(new{message = "Сессия невалидна"});
+            return Unauthorized(new{message = "Не авторизованный пользователь"});
     
         return Ok(projects);
     }

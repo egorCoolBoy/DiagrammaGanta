@@ -2,6 +2,6 @@
 
 public class Subject
 {
-    public Guid Id { get; set; }// На диаграмме не было 
+    public Guid Id { get; set; }
     public string Title { get; set; }
 }

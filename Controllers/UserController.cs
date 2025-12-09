@@ -47,18 +47,24 @@ public class UserController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto request)
     {
+        var tokenCheck = HttpContext.Request.Cookies["session"];
+
+         if (tokenCheck != null)
+             return Conflict(new{message = "Вы уже залогинены, сначала разлогиньтесь"});
+        
         var token = await _autoService.Login(request);
     
         if (token == null)
             return Unauthorized(new { message = "невалидная почта или пароль" });
         
-        var expires = DateTime.UtcNow.AddDays(30);
+        var expires = DateTime.UtcNow.AddDays(1);
         Response.Cookies.Append("session", token, new CookieOptions
         {
             HttpOnly = true,
             Path = "/",
             Expires = expires,
             Secure = true,    
+            SameSite = SameSiteMode.None
         });
 
         return Ok(new { message = "Вы успешно вошли в систему" });

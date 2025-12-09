@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TaskStatus = Diagramma_Ganta.Model.TaskStatus;
 
 namespace Diagramma_Ganta.Dto.Task;
 

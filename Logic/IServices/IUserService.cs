@@ -10,5 +10,6 @@ public interface IUserService
     public Task<Guid> Register(RegistRequest user);
     public  Task<string?> Login(LoginDto request);
     Task<bool?> Logout(string sessionToken);
-    Task<UserDto?> GetUser(string sessionToken); 
+    Task<UserDto?> GetUser(string sessionToken);
+    Task<bool>? IsSessionActive(string sessionToken);
 }
